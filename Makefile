@@ -245,8 +245,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 
 HOSTCC       = gcc
 HOSTCXX      = g++
-HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer
-HOSTCXXFLAGS = -O2
+HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O3 -fomit-frame-pointer
+HOSTCXXFLAGS = -O3
 
 # Decide whether to build built-in, modular, or both.
 # Normally, just do built-in.
@@ -347,8 +347,18 @@ CHECK		= sparse
 
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
 		  -Wbitwise -Wno-return-void $(CF)
-CFLAGS_MODULE   =
-AFLAGS_MODULE   =
+
+MODFLAGS = -O3 -pipe -marm \
+	   -march=armv7-a -mcpu=cortex-a9 \
+	   -mfloat-abi=hard -mfpu=vfp3 \
+	   -funswitch-loops \
+	   -floop-interchange -floop-strip-mine -floop-block \
+	   -fno-inline-functions -fno-tree-vectorize \
+	   -fmodulo-sched -fmodulo-sched-allow-regmoves \
+	   -fsingle-precision-constant -fsched-spec-load \
+
+CFLAGS_MODULE   =$(MODFLAGS)
+AFLAGS_MODULE   =$(MODFLAGS)
 LDFLAGS_MODULE  =
 CFLAGS_KERNEL	=
 AFLAGS_KERNEL	=
@@ -373,6 +383,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Wno-format-security \
 		   -fno-delete-null-pointer-checks \
 		    $(XX_A9) $(XX_GRAPHITE) $(XX_MODULO)
+
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
 KBUILD_AFLAGS   := -D__ASSEMBLY__

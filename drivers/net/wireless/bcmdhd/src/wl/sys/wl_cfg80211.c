@@ -575,7 +575,7 @@ static struct ieee80211_supported_band __wl_band_2ghz = {
 	.n_channels = ARRAY_SIZE(__wl_2ghz_channels),
 	.bitrates = wl_g_rates,
 	.n_bitrates = wl_g_rates_size,
-#if (ENABLE_P2P_INTERFACE)
+
 	/* wpa_supplicant sets wmm_enabled based on whether ht_cap
 	 * is present or not. The wmm_enabled is inturn used to
 	 * set the replay counters in the RSN IE. Without this
@@ -589,7 +589,6 @@ static struct ieee80211_supported_band __wl_band_2ghz = {
 				.ampdu_factor = IEEE80211_HT_MAX_AMPDU_64K,
 				.ampdu_density = IEEE80211_HT_MPDU_DENSITY_16
 	}
-#endif
 };
 
 static struct ieee80211_supported_band __wl_band_5ghz_a = {
