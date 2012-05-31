@@ -45,12 +45,6 @@
 		printk args;							\
 	} while (0)
 
-#define	WLDEV_INFO(args)						\
-	do {								\
-		printk(KERN_INFO "WLDEV-ERROR) %s : ", __func__);	\
-		printk args;					\
-	} while (0)
-
 extern int dhd_ioctl_entry_local(struct net_device *net, wl_ioctl_t *ioc, int cmd);
 
 s32 wldev_ioctl(
@@ -226,14 +220,7 @@ s32 wldev_iovar_setbuf_bsscfg(
 		mutex_lock(buf_sync);
 	}
 	iovar_len = wldev_mkiovar_bsscfg(iovar_name, param, paramlen, buf, buflen, bsscfg_idx);
-	if (iovar_len > 0)
-		ret = wldev_ioctl(dev, WLC_SET_VAR, buf, iovar_len, TRUE);
-	else {
-		if (buf_sync) {
-			mutex_unlock(buf_sync);
-		}
-		return BCME_BUFTOOSHORT;
-	}
+	ret = wldev_ioctl(dev, WLC_SET_VAR, buf, iovar_len, TRUE);
 	if (buf_sync) {
 		mutex_unlock(buf_sync);
 	}
@@ -375,7 +362,7 @@ int wldev_set_country(
 		return error;
 	}
 	dhd_bus_country_set(dev, &cspec);
-	WLDEV_INFO(("%s: set country for %s as %s rev %d\n",
+	WLDEV_ERROR(("%s: set country for %s as %s rev %d\n",
 		__FUNCTION__, country_code, cspec.ccode, cspec.rev));
 	return 0;
 }
