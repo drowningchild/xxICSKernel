@@ -45,6 +45,10 @@
 #include <linux/reboot.h>
 #endif
 
+#if MALI_GPU_UTILIZATION
+#include "mali_kernel_utilization.h"
+#endif /* MALI_GPU_UTILIZATION */
+
 #ifdef CONFIG_GPU_CLOCK_CONTROL
 #include <../common/gpu_clock_control.h>
 #include <../common/gpu_voltage_control.h>
