@@ -31,7 +31,7 @@ echo "Modules Copied"
 sleep 5
 touch kernel/usr/initramfs
 echo "Rebuilding kernel with new initramfs"
-make -j`grep 'processor' /proc/cpuinfo | wc -l`
+make -j8
 cp arch/arm/boot/zImage zImage
 # adb shell reboot download
 # sleep 5

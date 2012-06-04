@@ -193,7 +193,7 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
 # Note: Some architectures assign CROSS_COMPILE in their arch/*/Makefile
 export KBUILD_BUILDHOST := $(SUBARCH)
 ARCH		?= arm
-CROSS_COMPILE	?= $(CONFIG_CROSS_COMPILE:"%"=%)
+CROSS_COMPILE	?= /home/tony/android-toolchain-eabi/bin/arm-eabi-
 
 # Architecture as present in compile.h
 UTS_MACHINE 	:= $(ARCH)
@@ -245,8 +245,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 
 HOSTCC       = gcc
 HOSTCXX      = g++
-HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O3 -fomit-frame-pointer
-HOSTCXXFLAGS = -O3
+HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -Ofast -fomit-frame-pointer
+HOSTCXXFLAGS = -Ofast
 
 # Decide whether to build built-in, modular, or both.
 # Normally, just do built-in.
@@ -348,22 +348,21 @@ CHECK		= sparse
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
 		  -Wbitwise -Wno-return-void $(CF)
 
-MODFLAGS = -O3 -pipe -marm \
-	   -march=armv7-a -mcpu=cortex-a9 \
-	   -mfloat-abi=hard -mfpu=vfp3 \
-	   -funswitch-loops \
-	   -floop-interchange -floop-strip-mine -floop-block \
-	   -fno-inline-functions -fno-tree-vectorize \
-	   -fmodulo-sched -fmodulo-sched-allow-regmoves \
-	   -fsingle-precision-constant -fsched-spec-load \
+#MODFLAGS = -O3 -pipe -marm \
+#	   -march=armv7-a -mcpu=cortex-a9 \
+#	   -mfloat-abi=hard -mfpu=vfp3 \
+#	   -funswitch-loops \
+#	   -floop-interchange -floop-strip-mine -floop-block \
+#	   -fno-inline-functions -fno-tree-vectorize \
+#	   -fmodulo-sched -fmodulo-sched-allow-regmoves \
+#	   -fsingle-precision-constant -fsched-spec-load \
 
-CFLAGS_MODULE   =$(MODFLAGS)
-AFLAGS_MODULE   =$(MODFLAGS)
+CFLAGS_MODULE   = -DMODULE $(XX_A9) $(XX_GRAPHITE) $(XX_MODULO)
+AFLAGS_MODULE   = -DMODULE $(XX_A9) $(XX_GRAPHITE) $(XX_MODULO)
 LDFLAGS_MODULE  =
-CFLAGS_KERNEL	=
-AFLAGS_KERNEL	=
+CFLAGS_KERNEL	= $(XX_A9) $(XX_GRAPHITE) $(XX_MODULO)
+AFLAGS_KERNEL	= $(XX_A9) $(XX_GRAPHITE) $(XX_MODULO)
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage
-XX_A9		= -marm -mtune=cortex-a9 -mfpu=neon -march=armv7-a
 XX_GRAPHITE	= -fgraphite-identity -floop-block -ftree-loop-linear \
 		  -floop-strip-mine -ftree-loop-distribution
 XX_MODULO	= -fmodulo-sched -fmodulo-sched-allow-regmoves
@@ -384,11 +383,11 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-delete-null-pointer-checks \
 		    $(XX_A9) $(XX_GRAPHITE) $(XX_MODULO)
 
-KBUILD_AFLAGS_KERNEL :=
-KBUILD_CFLAGS_KERNEL :=
+KBUILD_AFLAGS_KERNEL := $(XX_A9) $(XX_GRAPHITE) $(XX_MODULO)
+KBUILD_CFLAGS_KERNEL := $(XX_A9) $(XX_GRAPHITE) $(XX_MODULO)
 KBUILD_AFLAGS   := -D__ASSEMBLY__
-KBUILD_AFLAGS_MODULE  := -DMODULE
-KBUILD_CFLAGS_MODULE  := -DMODULE
+KBUILD_AFLAGS_MODULE  := -DMODULE $(XX_A9) $(XX_GRAPHITE) $(XX_MODULO)
+KBUILD_CFLAGS_MODULE  := -DMODULE $(XX_A9) $(XX_GRAPHITE) $(XX_MODULO)
 KBUILD_LDFLAGS_MODULE := -T $(srctree)/scripts/module-common.lds
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
