@@ -363,6 +363,7 @@ LDFLAGS_MODULE  =
 CFLAGS_KERNEL	= $(XX_A9) $(XX_GRAPHITE) $(XX_MODULO)
 AFLAGS_KERNEL	= $(XX_A9) $(XX_GRAPHITE) $(XX_MODULO)
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage
+XX_A9    = -marm -mthumb-interwork -pipe -mtune=cortex-a9 -mfpu=neon -march=armv7-a
 XX_GRAPHITE	= -fgraphite-identity -floop-block -ftree-loop-linear \
 		  -floop-strip-mine -ftree-loop-distribution
 XX_MODULO	= -fmodulo-sched -fmodulo-sched-allow-regmoves
