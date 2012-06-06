@@ -24,14 +24,14 @@ rm -rf $(find kernel/usr/initramfs -name .git -print)
 #Enable FIPS mode
 export USE_SEC_FIPS_MODE=true
 #make xxKernel_i777_defconfig
-make -j`grep 'processor' /proc/cpuinfo | wc -l`
+make -j24
 echo "Copying Modules"
 cp -a $(find . -name *.ko -print |grep -v initramfs) kernel/usr/initramfs/lib/modules/
 echo "Modules Copied"
 sleep 5
 touch kernel/usr/initramfs
 echo "Rebuilding kernel with new initramfs"
-make -j8
+make -j32
 cp arch/arm/boot/zImage zImage
 # adb shell reboot download
 # sleep 5
