@@ -26,6 +26,8 @@ export USE_SEC_FIPS_MODE=true
 #make xxKernel_i777_defconfig
 make -j`grep 'processor' /proc/cpuinfo | wc -l`
 echo "Copying Modules"
+mkdir kernel/usr/initramfs/lib
+mkdir kernel/usr/initramfs/lib/modules
 cp -a $(find . -name *.ko -print |grep -v initramfs) kernel/usr/initramfs/lib/modules/
 echo "Modules Copied"
 sleep 5

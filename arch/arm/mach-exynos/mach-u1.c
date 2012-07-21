@@ -2355,7 +2355,7 @@ static struct regulator_init_data buck2_init_data = {
 static struct regulator_init_data buck3_init_data = {
 	.constraints	= {
 		.name		= "G3D_1.1V",
-		.min_uV		= 700000,
+		.min_uV		= 800000,
 		.max_uV		= 1200000,
 		.always_on	= 0,
 		.boot_on	= 0,
@@ -2695,6 +2695,7 @@ static int max8997_muic_charger_cb(int cable_type)
 		is_cable_attached = true;
 		break;
 	case CABLE_TYPE_MHL_VB:
+	case CABLE_TYPE_OTG_VB:
 		value.intval = POWER_SUPPLY_TYPE_MISC;
 		is_cable_attached = true;
 		break;
@@ -2738,7 +2739,7 @@ struct platform_device host_notifier_device = {
 };
 
 #include "u1-otg.c"
-static void max8997_muic_usb_cb(u8 usb_mode)
+static void max8997_muic_usb_cb(u8 usb_mode, bool bus_powered)
 {
 	struct s3c_udc *udc = platform_get_drvdata(&s3c_device_usbgadget);
 	int ret = 0;
@@ -2777,16 +2778,19 @@ static void max8997_muic_usb_cb(u8 usb_mode)
 #endif
 
 	if (udc) {
-		if (usb_mode == USB_OTGHOST_ATTACHED) {
+		if (usb_mode == USB_OTGHOST_ATTACHED && !bus_powered) {
 			usb_otg_accessory_power(1);
 			max8997_muic_charger_cb(CABLE_TYPE_OTG);
+		} else if (usb_mode == USB_OTGHOST_ATTACHED) {
+			pr_info("%s: usb vbus powered host\n", __func__);
+			usb_otg_accessory_power(0);
 		}
 
 		ret = c210_change_usb_mode(udc, usb_mode);
 		if (ret < 0)
 			pr_err("%s: fail to change mode!!!\n", __func__);
 
-		if (usb_mode == USB_OTGHOST_DETACHED)
+		if (usb_mode == USB_OTGHOST_DETACHED && !bus_powered)
 			usb_otg_accessory_power(0);
 	} else
 		pr_info("otg error s3c_udc is null.\n");
@@ -3003,7 +3007,7 @@ void sec_set_main_mic_bias(bool on)
 
 void sec_set_ldo1_constraints(int disabled)
 {
-#if 0				/* later */
+#if defined(CONFIG_TARGET_LOCALE_NAATT_TEMP)
 	/* VDD33_ADC */
 	ldo1_init_data.constraints.state_mem.disabled = disabled;
 	ldo1_init_data.constraints.state_mem.enabled = !disabled;
@@ -4830,7 +4834,7 @@ static int max17042_low_batt_cb(void)
 #ifdef RECAL_SOC_FOR_MAXIM
 static bool max17042_need_soc_recal(void)
 {
-	pr_info("%s: HW(0x%x)\n", __func__, system_rev);
+	pr_debug("%s: HW(0x%x)\n", __func__, system_rev);
 
 	if (system_rev >= NO_NEED_RECAL_SOC_HW_REV)
 		return false;

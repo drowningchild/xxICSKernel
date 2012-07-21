@@ -263,12 +263,11 @@ static void usb_rx_complete(struct urb *urb)
 		/* how we can distinguish boot ch with fmt ch ?? */
 		switch (pipe_data->format) {
 		case IF_USB_FMT_EP:
-			if (usb_ld->if_usb_is_main) {
-				pr_urb("IPC-RX", urb);
-				iod_format = IPC_FMT;
-			} else {
-				iod_format = IPC_BOOT;
-			}
+			iod_format = IPC_FMT;
+#if 0
+			pr_buffer("IPC-RX", (char *)urb->transfer_buffer,
+				(size_t)urb->actual_length, MAX_SKB_LOG_LEN);
+#endif
 			break;
 		case IF_USB_RAW_EP:
 			iod_format = IPC_MULTI_RAW;
@@ -549,9 +548,33 @@ static void usb_tx_work(struct work_struct *work)
 		if (ret) {
 			if (ret != -ENODEV && ret != -ENOENT)
 				pm_runtime_put(dev);
-			/* Do not call runtime_put if ret is ENODEV. Unless it
-			 * will invoke bugs */
-			else
+				continue;
+			}
+
+#if 0
+			if (iod->format == IPC_FMT)
+				pr_skb("IPC-TX", skb);
+#endif
+
+			usb_mark_last_busy(usb_ld->usbdev);
+			ret = usb_tx_urb_with_skb(usb_ld->usbdev,
+						skb,
+						pipe_data);
+			pr_debug("TX[F]\n");
+			if (ret < 0) {
+				if (ret == -ENODEV) {
+					dev_kfree_skb_any(skb);
+					skb_queue_purge(&ld->sk_fmt_tx_q);
+					skb_queue_purge(&ld->sk_raw_tx_q);
+					/* when if disconnected, runtime call
+					 * for 'dev pointer' makes bugs, dev
+					 * has already broken through
+					 * disconnection, so do not call
+					 * runtime_put here */
+					return;
+				}
+				pr_err("%s usb_tx_urb_with_skb for iod(%d)\n",
+						__func__, iod->format);
 				skb_queue_head(&ld->sk_fmt_tx_q, skb);
 			return;
 		}
@@ -722,11 +745,11 @@ static inline int link_pm_slave_wake(struct link_pm_data *pm_data)
 				!= HOSTWAKE_TRIGLEVEL) {
 		if (gpio_get_value(pm_data->gpio_link_slavewake)) {
 			gpio_set_value(pm_data->gpio_link_slavewake, 0);
-			mif_info("gpio [SWK] set [0]\n");
+			pr_debug("[MIF] gpio [SWK] set [0]\n");
 			mdelay(5);
 		}
 		gpio_set_value(pm_data->gpio_link_slavewake, 1);
-		mif_info("gpio [SWK] set [1]\n");
+		pr_debug("[MIF] gpio [SWK] set [1]\n");
 		mdelay(5);
 
 		/* wait host wake signal*/
@@ -831,8 +854,7 @@ static irqreturn_t link_pm_irq_handler(int irq, void *data)
 		runtime pm status changes to ACTIVE
 	*/
 	value = gpio_get_value(pm_data->gpio_link_hostwake);
-	mif_info("gpio [HWK] get [%d]\n", value);
-
+	pr_debug("[MIF] gpio [HWK] get [%d]\n", value);
 	/*
 	* igonore host wakeup interrupt at suspending kernel
 	*/
@@ -864,7 +886,7 @@ static irqreturn_t link_pm_irq_handler(int irq, void *data)
 		*/
 		/* clear slave cpu wake up pin */
 		gpio_set_value(pm_data->gpio_link_slavewake, 0);
-		mif_debug("gpio [SWK] set [0]\n");
+		pr_debug("[MIF] gpio [SWK] set [0]\n");
 	}
 	return IRQ_HANDLED;
 }

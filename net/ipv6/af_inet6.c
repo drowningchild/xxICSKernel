@@ -88,13 +88,13 @@ static struct list_head inetsw6[SOCK_MAX];
 static DEFINE_SPINLOCK(inetsw6_lock);
 
 struct ipv6_params ipv6_defaults = {
-	.disable_ipv6 = 0,
+	.disable_ipv6 = 1,
 	.autoconf = 1,
 };
 
 static int disable_ipv6_mod = 0;
 
-module_param_named(disable, disable_ipv6_mod, int, 0444);
+module_param_named(disable, disable_ipv6_mod, int, 0644);
 MODULE_PARM_DESC(disable, "Disable IPv6 module such that it is non-functional");
 
 module_param_named(disable_ipv6, ipv6_defaults.disable_ipv6, int, 0444);

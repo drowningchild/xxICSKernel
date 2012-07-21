@@ -8,6 +8,10 @@
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/bitops.h>
+<<<<<<< HEAD
+=======
+#include <linux/cryptohash.h>
+>>>>>>> upstream/master
 #include <asm/unaligned.h>
 
 /*
